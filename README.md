@@ -5,7 +5,7 @@
   <h3 align="center">LibraryGen</h3>
 
   <p align="center">
-    A static pdf library site generator
+    A static site generator for PDF Libraries
   </p>
 </div>
 
@@ -187,7 +187,7 @@ More than happy to receive alternate suggestions on more efficient and / or fast
 
 ### What's the deal with all the file manipulation?
 
-Tesseract requires a decent resolution to (300+ dpi) and has a bug when dealing with random resolutions that requires a border to work.
+Tesseract requires a decent resolution to do OCR (300+ dpi) and has a bug when dealing with random resolutions that requires a border to work.
 
 
 
