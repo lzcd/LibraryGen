@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <style>
+    body {
+      background-color: #333;
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      color: #CCC;
+    }
+
+    a:link {
+      color: #CCC
+    }
+
+    a:visited {
+      color: #0CC
+    }
+
+    .publicationList {
+      display: flex;
+      flex-flow: row wrap;
+    }
+
+    .publicationPreview {
+      margin: 10pt;
+      
+    }
+
+    .publicationPreview>.cover {
+      filter: drop-shadow(5px 5px 4px #00000033);
+      display: block;
+      width: 100pt;
+    }
+
+    .publicationPreview>.title {
+      width: 100pt;
+    }
+
+    .publicationContent {
+      width: 90%;
+      margin: auto;
+      filter: drop-shadow(5px 5px 4px #00000033);
+    }
+  </style>
+  <a href="/">Home</a>
+  <div id="collectionContent" class="publicationList"></div>
+  <img id="pageImageContent" class="publicationContent"/>
+
+  <template id="publicationTemplate">
+    <a href="#" class="publicationPreview">
+      <img class="cover" />
+      <p class="title"></p>
+    </div>
+  </template>
+
+
+  <script>
+    modes = {
+      collection: 0,
+      publication: 1
+    }
+
+    async function updateContentDisplay(imageContainer) {
+      switch (mode) {
+        case modes.collection:
+          await displayCollection()
+          break
+
+        case modes.publication:
+          await displayPublication()
+          break
+      }
+
+    }
+
+    async function displayCollection() {
+      collectionContainer.innerHTML = ""
+      for (publication of structure.publications) {
+        let publicationStructurePath = '/' + publication.folder + '/structure.json'
+        let publicationStructure = await fetch(publicationStructurePath)
+          .then((response) => {
+            if (!response.ok) {
+              return { pages: [] }
+            }
+            return response.json()
+          })
+
+        if (publicationStructure === undefined ||
+            publicationStructure.pages == undefined ||
+            publicationStructure.pages.length == 0) {
+            continue
+        }
+        let coverPage = publicationStructure.pages[0]
+        let publicationFirstPageImagePath = '/' + publication.folder + '/' + coverPage.file
+
+        let publicationMetaPath = '/' + publication.folder + '/meta.json'
+        let publicationMeta = await fetch(publicationMetaPath)
+          .then((response) => {
+            if (!response.ok) {
+              return {}
+            }
+            return response.json()
+          })
+
+        let coverDisplay = publicationTemplate.content.cloneNode(true)
+        coverImageElement = coverDisplay.querySelector(".cover")
+        coverImageElement.src = publicationFirstPageImagePath
+
+        titleElement = coverDisplay.querySelector(".title")
+        title = publication.folder
+        if (publicationMeta.title !== undefined) {
+          title = publicationMeta.title
+        }
+        titleElement.innerHTML = title
+
+        destinationUrl = "/?publication=" + encodeURIComponent(publication.folder) + "&page=0"
+        reference = coverDisplay.querySelector(".publicationPreview")
+        reference.href = destinationUrl
+
+        collectionContainer.appendChild(coverDisplay)
+      }
+
+      collectionContainer.style.display = "flex"
+      pageImageContainer.style.display = "none"
+    }
+
+    async function displayPublication() {
+      let publicationFolder = currentPublication.folder
+      let publicationStructurePath = '/' + publicationFolder + '/structure.json'
+      let publicationStructure = await fetch(publicationStructurePath).then(response => response.json());
+      if (currentPageIndex < 0) {
+        currentPageIndex = 0
+      }
+      if (currentPageIndex >= publicationStructure.pages.length) {
+        currentPageIndex = publicationStructure.pages.length -1
+      }
+      let page = publicationStructure.pages[currentPageIndex]
+      pageImageContainer.src = '/' + publicationFolder + '/' + page.file
+
+      collectionContainer.style.display = "none"
+      pageImageContainer.style.display = "block"
+    }
+
+
+    async function handleKeyDown(e) {
+      switch (mode) {
+        case modes.collection:
+          break
+        case modes.publication:
+          switch (e.key) {
+            case "Left":
+            case "ArrowLeft":
+              currentPageIndex -= 1
+              location.search = "publication=" + encodeURIComponent(currentPublication.folder) + "&page=" + currentPageIndex
+              break
+            case "Right":
+            case "ArrowRight":
+              currentPageIndex += 1
+              location.search = "publication=" + encodeURIComponent(currentPublication.folder) + "&page=" + currentPageIndex
+              break
+            default:
+              return
+          }
+          break
+      }
+
+    }
+
+    let collectionContainer = document.getElementById("collectionContent")
+    let publicationTemplate = document.getElementById("publicationTemplate")
+    let pageImageContainer = document.getElementById("pageImageContent")
+
+    let currentPublication = undefined
+
+    let params = new URL(document.location).searchParams;
+    let selectedPublicationNameUri = params.get("publication")
+    if (selectedPublicationNameUri !== null) {
+      let selectedPublicationName = decodeURI(selectedPublicationNameUri)
+      let selectedPageIndex = params.get("page")
+      currentPublication = { folder: selectedPublicationName }
+    }
+
+    let currentPageIndex = 0
+    let selectedPageIndexText = params.get("page")
+    if (selectedPageIndexText != null) {
+      currentPageIndex = parseInt(selectedPageIndexText)
+    }
+
+    let mode = modes.collection
+    if (currentPublication !== undefined) {
+      mode = modes.publication
+    }
+    let structure = {}
+
+
+    async function start() {
+      structure = await fetch('/structure.json').then(response => response.json())
+      await updateContentDisplay(pageImageContainer)
+      document.addEventListener('keydown', handleKeyDown)
+    }
+
+    start()
+  </script>
+</body>
+
+</html>
