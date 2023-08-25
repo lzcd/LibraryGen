@@ -86,11 +86,7 @@ Here are the equivalent NixOS packages for your configuration.nix:
 
 5. Profit!
 
-{% note %}
-
-Note: Navigation between pages is done via the keyboard arrow keys. I'll be adding onscreen controls as a priority.
-
-{% endnote %}
+**Note: Navigation between pages is done via the keyboard arrow keys. I'll be adding onscreen controls as a priority.**
 
 Anytime you add a new PDF to the input folder, simply re-run the generate command:
 
