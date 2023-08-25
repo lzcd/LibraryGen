@@ -79,7 +79,7 @@ Here are the equivalent NixOS packages for your configuration.nix:
     ```
 3. Run the generator (whith INPUTFOLDER and OUTPUT folder substitued with your own input and output folders)
    ```sh
-   generator -i INPUTFOLDER -o OUTPUTFOLDER
+   python3 generator.py -i INPUTFOLDER -o OUTPUTFOLDER
    ```
 
 4. Point your webserver at the output folder
@@ -89,7 +89,7 @@ Here are the equivalent NixOS packages for your configuration.nix:
 Anytime you add a new PDF to the input folder, simply re-run the generate command:
 
    ```sh
-   generator -i INPUTFOLDER -o OUTPUTFOLDER
+   python3 generator.py -i INPUTFOLDER -o OUTPUTFOLDER
    ```
 
 
